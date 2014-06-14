@@ -7,8 +7,7 @@ use warnings FATAL => 'all';
 use Moo;
 extends 'Time::Duration::Concise';
 
-use Data::Dumper;
-use Module::Runtime;
+use Module::Runtime qw(require_module);
 
 our $VERSION = '0.01';
 
@@ -25,15 +24,24 @@ Version 0.01
     use Time::Duration::Concise::Localize;
 
     my $duration = Time::Duration::Concise::Localize->new(
+
+        # concise time interval
         'interval' => '1.5h',
-        'localize_class' => 'My::i18N',
-        'localize_method => sub {
-            # Your custom localization method
-            # Two parameters will be supplied
-	    # $_[0] ---> value
-	    # $_[1] ---> unit
-            return your_loalize_method( $_[0], $_[1] );
-         }
+
+        # Localize class will be imported during runtime
+        'localize_class' => 'My::i18n',
+
+        # Your anonymous method, :) your logic for translation
+        'localize_method' => sub {
+
+            # This is an anonymous function, it would be called
+            # when as_strig function generate duration as string
+            # Your translation logic applies here
+
+            My::i18n->new( 'language' => 'ms-my' )->translate_time_duration(@_);
+            # Method translate_time_duration will recieve two parameters
+            # value and unit
+        }
     );
 
     $duration->as_string;
@@ -77,14 +85,18 @@ Localized duration string
 sub as_string {
     my ( $self ) = @_;
 
-    Module::Runtime::require_module( $self->localize_class );
-
+    my $localize_class  = $self->localize_class;
     my $localize_method = $self->localize_method;
+
+    require_module( $localize_class );
+
     my @duration_translated;
     foreach my $duration ( @{$self->duration_array()} ){
         push(
             @duration_translated,
-            &$localize_method( $duration->{'value'}, $duration->{'unit'} )
+            &$localize_method(
+                $duration->{'value'}, $duration->{'unit'}
+            )
         );
     }
     return join(', ', @duration_translated);

@@ -276,19 +276,19 @@ Returns the minimum number of the given period represented by this TI >= 1.
 =cut
 
 sub minimum_number_of {
-    my ($self, $unit) = @_;
+    my ( $self, $unit ) = @_;
     my $orig_unit = $unit;
     $unit =~ s/s$// if (length($unit) > 1);    # Chop plurals, but not 's' itself
     $unit = substr($unit,0,1);
     $unit = 'ms' if $orig_unit =~/months/ig;
 
     my %unit_maps = (
-	'ms' => 'months',
-	'w' => 'weeks',
-        'd' => 'days',
-	'h' => 'hours',
-	'm' => 'minutes',
-	's' => 'seconds',
+        'ms' => 'months',
+        'w'  => 'weeks',
+        'd'  => 'days',
+        'h'  => 'hours',
+        'm'  => 'minutes',
+        's'  => 'seconds',
     );
     my $method = $unit_maps{$unit};
     confess "Cannot determine period for $orig_unit" unless ($method);
