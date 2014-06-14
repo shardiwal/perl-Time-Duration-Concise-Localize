@@ -13,7 +13,11 @@ our $VERSION = '0.01';
 
 =head1 NAME
 
-Time::Duration::Concise::Localize is an approach to localize concise time druation string representation.
+Time::Duration::Concise::Localize - An intestring approach to localize concise time druation string representation.
+
+=head1 DESCRIPTION
+
+Time::Duration::Concise is an approach to localize concise time druation string representation.
 
 =head1 VERSION
 
@@ -56,6 +60,13 @@ concise interval string
 
 your custom localization class name
 
+=cut
+
+has 'localize_class' => (
+    is => 'rw',
+    required => 1
+);
+
 =head2 localize_method (REQUIRED)
 
 your custom localization anonymous method call
@@ -63,11 +74,6 @@ your custom localization anonymous method call
 default paramenters to your class methods would be $val, $unit
 
 =cut
-
-has 'localize_class' => (
-    is => 'rw',
-    required => 1
-);
 
 has 'localize_method' => (
     is => 'rw',
@@ -83,7 +89,7 @@ Localized duration string
 =cut
 
 sub as_string {
-    my ( $self ) = @_;
+    my ( $self, $precision ) = @_;
 
     my $localize_class  = $self->localize_class;
     my $localize_method = $self->localize_method;
@@ -91,7 +97,7 @@ sub as_string {
     require_module( $localize_class );
 
     my @duration_translated;
-    foreach my $duration ( @{$self->duration_array()} ){
+    foreach my $duration ( @{$self->duration_array( $precision )} ){
         push(
             @duration_translated,
             &$localize_method(
