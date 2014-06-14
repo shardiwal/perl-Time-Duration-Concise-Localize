@@ -20,7 +20,7 @@ WriteMakefile(
         'Moo'               => 0,
         'Carp'              => 0,
         'Module::Runtime'   => 0,
-	'POSIX' 	    => 0
+        'POSIX' 	        => 0
     },
     PREREQ_PM => {
     },
