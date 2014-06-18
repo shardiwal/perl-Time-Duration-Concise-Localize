@@ -169,7 +169,7 @@ sub hours {
 
 =head2 days
 
-The number of minutes represented by this time interval.
+The number of days represented by this time interval.
 
 =cut
 
@@ -266,7 +266,7 @@ sub _duration_array {
 
 =head2 minimum_number_of
 
-Returns the minimum number of the given period represented by this TI >= 1.
+Returns the minimum number of the given period.
 
 =cut
 
@@ -278,7 +278,7 @@ sub minimum_number_of {
     $unit = 'ms' if $orig_unit =~/months/ig;
 
     my %unit_maps = (
-        'ms' => 'months',
+        'mo' => 'months',
         'w'  => 'weeks',
         'd'  => 'days',
         'h'  => 'hours',

@@ -110,19 +110,19 @@ sub as_string {
 
 =head2 entry_code
 
-A code suitable for displaying to the client to select individually.  The largest available integral unit.
+The largest division of this [Duration]
 
 =cut
 
-sub entry_code {
+sub normalized_code {
     my ( $self ) = @_;
 
     my %length_to_period = %Time::Duration::Concise::LENGTH_TO_PERIOD;
     my @keys = sort { $b <=> $a } keys %length_to_period;
 
     my $entry_code = '0s';
-    while ($entry_code eq '0s' and my $period_length = shift @keys) {
-        if (not $self->seconds % $period_length) {
+    foreach my $period_length ( @keys ) {
+        if ( not $self->seconds % $period_length ) {
             my $period_size = $self->seconds / $period_length;
             $entry_code = $period_size . substr($length_to_period{$period_length}, 0, 1);
         }
