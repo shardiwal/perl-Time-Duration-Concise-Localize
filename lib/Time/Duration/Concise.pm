@@ -97,7 +97,7 @@ sub _build_in_seconds {
 
     my $in_seconds = 0;
 
-    # These should be integers, but old cookies might have 0.5m
+    # These should be integers, but we might need to have 0.5m
     while ($interval =~ s/(-?\d*\.?\d+)([$known_units])//) {
         my $amount = $1;
         my $units  = $2;
