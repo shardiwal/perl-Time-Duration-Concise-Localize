@@ -15,12 +15,14 @@ WriteMakefile(
         'ExtUtils::MakeMaker' => 0,
     },
     BUILD_REQUIRES => {
-        'Test::More'        => 0,
-        'Time::Seconds'     => 0,
-        'Moo'               => 0,
-        'Carp'              => 0,
-        'Module::Runtime'   => 0,
-        'POSIX' 	        => 0
+        'Test::More'         => 0,
+        'Test::FailWarnings' => 0,
+        'Test::Exception'    => 0,
+        'Time::Seconds'      => 0,
+        'Moo'                => 0,
+        'Carp'               => 0,
+        'Module::Runtime'    => 0,
+        'POSIX' 	         => 0
     },
     PREREQ_PM => {
     },

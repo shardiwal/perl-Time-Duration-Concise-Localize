@@ -9,19 +9,19 @@ extends 'Time::Duration::Concise';
 
 use Module::Runtime qw(require_module);
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 NAME
 
-Time::Duration::Concise::Localize - An intestring approach to localize concise time druation string representation.
+Time::Duration::Concise::Localize - An interesting approach to localize concise time duration string representation.
 
 =head1 DESCRIPTION
 
-Time::Duration::Concise is an approach to localize concise time druation string representation.
+Time::Duration::Concise is an approach to localize concise time duration string representation.
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =head1 SYNOPSIS
 

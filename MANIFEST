@@ -4,7 +4,7 @@ lib/Time/Duration/Concise/Localize.pm
 Makefile.PL
 MANIFEST
 README
-lib/i18n.pm
+t/i18n.pm
 t/00-load.t
 t/01-concise_test.t
 t/02-concise_localize.t
