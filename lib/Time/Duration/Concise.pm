@@ -15,7 +15,7 @@ Time::Duration::Concise
 
 =head1 DESCRIPTION
 
-Time::Duration::Concise is an improved approach to convert concise time druation to string representation.
+Time::Duration::Concise is an improved approach to convert concise time duration to string representation.
 
 =head1 VERSION
 

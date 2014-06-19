@@ -8,6 +8,8 @@ use Test::FailWarnings;
 use Test::Exception;
 use Time::Duration::Concise::Localize;
 
+use lib 't';
+
 plan tests => 15;
 
 my $duration = Time::Duration::Concise::Localize->new(
