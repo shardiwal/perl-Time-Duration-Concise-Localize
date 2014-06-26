@@ -18,7 +18,7 @@ WriteMakefile(
         'Test::More'         => 0,
         'Test::FailWarnings' => 0,
         'Test::Exception'    => 0,
-        'Time::Seconds'      => 0,
+        'Time::Seconds'      => 1.27,
         'Moo'                => 0,
         'Carp'               => 0,
         'Module::Runtime'    => 0,
