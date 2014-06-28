@@ -10,7 +10,7 @@ use Time::Duration::Concise::Localize;
 
 use lib 't';
 
-plan tests => 15;
+plan tests => 16;
 
 my $duration = Time::Duration::Concise::Localize->new(
     interval => '1d1.5h',
@@ -28,6 +28,7 @@ is ( $duration->as_string, '1 hari, 1 jam, 30 minit', 'As string');
 is ( $duration->as_string(1), '1 hari', 'As string precision 1');
 is ( $duration->as_string(2), '1 hari, 1 jam', 'As string precision 2');
 is ( $duration->as_string(3), '1 hari, 1 jam, 30 minit', 'As string precision 3');
+is ( $duration->as_concise_string, '1d1h30m', 'Concise format');
 is ( scalar @{$duration->duration_array(3)}, '3', 'Duration array precision 3');
 is ( scalar @{$duration->duration_array(1)}, '1', 'Duration array precision 1');
 is ( $duration->minimum_number_of('seconds'), 91800, 'Minimum number of seconds');

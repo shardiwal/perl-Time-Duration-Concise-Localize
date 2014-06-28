@@ -19,11 +19,11 @@ Time::Duration::Concise is an improved approach to convert concise time duration
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 our %LENGTH_TO_PERIOD = (
     86400 => 'day',
@@ -75,7 +75,7 @@ Example : 1.5h
 =cut
 
 has 'interval' => (
-    is => 'ro',
+    is => 'rw',
     required => 1
 );
 
@@ -94,6 +94,12 @@ sub _build_in_seconds {
     # Try our best to make it parseable.
     $interval =~ s/\s//g;
     $interval = lc $interval;
+
+    # All numbers implies a number of seconds.
+    if ($interval =~ /^([+-]?\d+)(?:s?)$/) {
+        $interval .= 's';
+	$self->interval( $interval );
+    }
 
     my $in_seconds = 0;
 
@@ -215,6 +221,43 @@ sub as_string {
     my ( $self, $precision ) = @_;
     my $time_frames = $self->_duration_array( $precision );
     return join(', ', @$time_frames );
+}
+
+=head2 as_concise_string
+
+Concise time druation to conscise string representation.
+
+=cut
+
+sub as_concise_string {
+    my ( $self, $precision ) = @_;
+    my $time_frames = $self->_duration_array( $precision );
+    my @concise_time_frames = map {
+        $_ =~s/\s+//ig;
+        $_ =~/(\d+[A-Za-z]{1})/ig;
+        $1;
+    } @$time_frames;
+    return join('', @concise_time_frames );
+}
+
+=head2 normalized_code
+
+The largest division of Duration
+
+=cut
+
+sub normalized_code {
+    my ( $self ) = @_;
+    my @keys = sort { $b <=> $a } keys %LENGTH_TO_PERIOD;
+
+    my $entry_code = '0s';
+    foreach my $period_length ( @keys ) {
+        if ( not $self->seconds % $period_length ) {
+            my $period_size = $self->seconds / $period_length;
+            $entry_code = $period_size . substr($LENGTH_TO_PERIOD{$period_length}, 0, 1);
+        }
+    }
+    return $entry_code;
 }
 
 =head2 duration_array
