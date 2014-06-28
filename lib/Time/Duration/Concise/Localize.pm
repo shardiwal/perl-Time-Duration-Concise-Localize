@@ -9,7 +9,7 @@ extends 'Time::Duration::Concise';
 
 use Module::Runtime qw(require_module);
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =head1 NAME
 
@@ -21,7 +21,7 @@ Time::Duration::Concise is an approach to localize concise time duration string 
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 =head1 SYNOPSIS
 
@@ -106,28 +106,6 @@ sub as_string {
         );
     }
     return join(', ', @duration_translated);
-}
-
-=head2 entry_code
-
-The largest division of this [Duration]
-
-=cut
-
-sub normalized_code {
-    my ( $self ) = @_;
-
-    my %length_to_period = %Time::Duration::Concise::LENGTH_TO_PERIOD;
-    my @keys = sort { $b <=> $a } keys %length_to_period;
-
-    my $entry_code = '0s';
-    foreach my $period_length ( @keys ) {
-        if ( not $self->seconds % $period_length ) {
-            my $period_size = $self->seconds / $period_length;
-            $entry_code = $period_size . substr($length_to_period{$period_length}, 0, 1);
-        }
-    }
-    return $entry_code;
 }
 
 =head1 AUTHOR
