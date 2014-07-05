@@ -8,6 +8,7 @@ t/i18n.pm
 t/00-load.t
 t/01-concise_test.t
 t/02-concise_localize.t
+t/03-concise_more.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
