@@ -13,3 +13,6 @@ Revision history for Time-Duration-Concise-Localize
         Various improvements, now if time concise format is just number, we assume it is seconds
         as_concise_string method will rebuild time concise format
         normalized_code code is part of consie module, instead of Localize. That's the better place.
+
+0.05    05/07/2014
+        More test cases, bug fixes
