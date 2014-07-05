@@ -19,11 +19,11 @@ Time::Duration::Concise is an improved approach to convert concise time duration
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 our %LENGTH_TO_PERIOD = (
     86400 => 'day',
@@ -96,7 +96,7 @@ sub _build_in_seconds {
     $interval = lc $interval;
 
     # All numbers implies a number of seconds.
-    if ($interval =~ /^([+-]?\d+)(?:s?)$/) {
+    if ($interval !~ /[A-Za-z]/) {
         $interval .= 's';
 	$self->interval( $interval );
     }
@@ -104,7 +104,7 @@ sub _build_in_seconds {
     my $in_seconds = 0;
 
     # These should be integers, but we might need to have 0.5m
-    while ($interval =~ s/(-?\d*\.?\d+)([$known_units])//) {
+    while ($interval =~ s/([+-]?\d*\.?\d+)([$known_units])//) {
         my $amount = $1;
         my $units  = $2;
 
@@ -220,7 +220,7 @@ Concise time druation to string representation.
 sub as_string {
     my ( $self, $precision ) = @_;
     my $time_frames = $self->_duration_array( $precision );
-    return join(', ', @$time_frames );
+    return join(' ', @$time_frames );
 }
 
 =head2 as_concise_string
@@ -251,7 +251,7 @@ sub normalized_code {
     my @keys = sort { $b <=> $a } keys %LENGTH_TO_PERIOD;
 
     my $entry_code = '0s';
-    foreach my $period_length ( @keys ) {
+    while ($entry_code eq '0s' and my $period_length = shift @keys) {
         if ( not $self->seconds % $period_length ) {
             my $period_size = $self->seconds / $period_length;
             $entry_code = $period_size . substr($LENGTH_TO_PERIOD{$period_length}, 0, 1);

@@ -105,7 +105,7 @@ sub as_string {
             )
         );
     }
-    return join(', ', @duration_translated);
+    return join(' ', @duration_translated);
 }
 
 =head1 AUTHOR
