@@ -16,3 +16,6 @@ Revision history for Time-Duration-Concise-Localize
 
 0.05    05/07/2014
         More test cases, bug fixes
+
+0.06    06/07/2014
+        Makefile improvement, add repo info, module info
