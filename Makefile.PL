@@ -15,17 +15,27 @@ WriteMakefile(
         'ExtUtils::MakeMaker' => 0,
     },
     BUILD_REQUIRES => {
+	'Test::NoWarnings'   => 0,
         'Test::More'         => 0,
         'Test::FailWarnings' => 0,
         'Test::Exception'    => 0,
-        'Time::Seconds'      => 1.27,
+    },
+    PREREQ_PM => {
         'Moo'                => 0,
         'Carp'               => 0,
         'Module::Runtime'    => 0,
-        'POSIX' 	         => 0
+        'POSIX' 	     => 0,
+        'Time::Seconds'      => 1.27,
     },
-    PREREQ_PM => {
-    },
+    (! eval { ExtUtils::MakeMaker->VERSION(6.46) } ? () :
+        (META_ADD => {
+            resources => {
+                homepage   => 'https://github.com/binary-com/perl-Time-Duration-Concise-Localize',
+                repository => 'git@github.com:binary-com/perl-Time-Duration-Concise-Localize.git',
+                bugtracker => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=Time-Duration-Concise-Localize',
+            },
+        })
+    ),
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Time-Duration-Concise-Localize-*' },
 );
