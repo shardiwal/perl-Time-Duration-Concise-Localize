@@ -19,3 +19,6 @@ Revision history for Time-Duration-Concise-Localize
 
 0.06    06/07/2014
         Makefile improvement, add repo info, module info
+
+0.07    11/07/2014
+        Bug fix "Use of uninitialized value $1"
