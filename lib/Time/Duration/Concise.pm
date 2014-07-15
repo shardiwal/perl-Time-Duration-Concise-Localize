@@ -19,11 +19,11 @@ Time::Duration::Concise is an improved approach to convert concise time duration
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 our %LENGTH_TO_PERIOD = (
     86400 => 'day',
@@ -300,9 +300,9 @@ sub _duration_array {
 
         # Make sure we gets the number
         # to avoid Use of uninitialized warning
-        if ( defined $1 ) {
-            $frame  = ''  if $1 == 0;
-            $frame .= 's' if $1 > 1;
+        if ( defined $1 && $1 ) {
+            $frame  = ''  if int($1) == 0;
+            $frame .= 's' if int($1) > 1;
         }
         else {
             $frame = undef;
