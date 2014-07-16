@@ -19,11 +19,11 @@ Time::Duration::Concise is an improved approach to convert concise time duration
 
 =head1 VERSION
 
-Version 0.05
+Version 0.06
 
 =cut
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 our %LENGTH_TO_PERIOD = (
     86400 => 'day',
@@ -303,13 +303,13 @@ sub _duration_array {
         if ( defined $1 && $1 ) {
             $frame  = ''  if int($1) == 0;
             $frame .= 's' if int($1) > 1;
+            $precision_counter++;
         }
         else {
             $frame = undef;
         }
 
         push ( @$time_frame, $frame ) if $frame;
-        $precision_counter++;
     }
     return $time_frame;
 }
@@ -325,7 +325,7 @@ sub minimum_number_of {
     my $orig_unit = $unit;
     $unit =~ s/s$// if (length($unit) > 1);    # Chop plurals, but not 's' itself
     $unit = substr($unit,0,1);
-    $unit = 'ms' if $orig_unit =~/months/ig;
+    $unit = 'mo' if $orig_unit =~/months/ig;
 
     my %unit_maps = (
         'mo' => 'months',
