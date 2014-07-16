@@ -9,7 +9,7 @@ extends 'Time::Duration::Concise';
 
 use Module::Runtime qw(require_module);
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 =head1 NAME
 
@@ -21,7 +21,7 @@ Time::Duration::Concise is an approach to localize concise time duration string 
 
 =head1 VERSION
 
-Version 0.08
+Version 0.09
 
 =head1 SYNOPSIS
 

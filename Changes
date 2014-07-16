@@ -25,3 +25,6 @@ Revision history for Time-Duration-Concise-Localize
 
 0.08    16/07/2014
         Precision made more percise and more test case to test as_string
+
+0.09    16/07/2014
+        when printing duration as string minues should be symbol not text
