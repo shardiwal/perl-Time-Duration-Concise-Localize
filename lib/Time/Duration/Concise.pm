@@ -19,11 +19,11 @@ Time::Duration::Concise is an improved approach to convert concise time duration
 
 =head1 VERSION
 
-Version 0.05
+Version 0.06
 
 =cut
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 our %LENGTH_TO_PERIOD = (
     86400 => 'day',
@@ -32,9 +32,8 @@ our %LENGTH_TO_PERIOD = (
     1     => 'second',
 );
 
-our %PERIOD_SIZES = map {
-    substr($LENGTH_TO_PERIOD{$_}, 0, 1) => $_
-} keys %LENGTH_TO_PERIOD;
+our %PERIOD_SIZES =
+  map { substr( $LENGTH_TO_PERIOD{$_}, 0, 1 ) => $_ } keys %LENGTH_TO_PERIOD;
 
 =head1 SYNOPSIS
 
@@ -75,62 +74,68 @@ Example : 1.5h
 =cut
 
 has 'interval' => (
-    is => 'rw',
+    is       => 'rw',
     required => 1
 );
 
 has 'seconds' => (
-    is => 'lazy',
+    is      => 'lazy',
     builder => '_build_in_seconds'
 );
 
 sub _build_in_seconds {
-    my ( $self ) = @_;
+    my ($self) = @_;
 
-    my $interval    = $self->interval;
+    my $interval = $self->interval;
+
+    if ( defined $interval ) {
+        Carp::croak( "Invalid time interval" ) if $interval eq '';
+    }
+
     my $known_units = $self->_known_units;
 
     my %seen;
+
     # Try our best to make it parseable.
     $interval =~ s/\s//g;
     $interval = lc $interval;
 
     # All numbers implies a number of seconds.
-    if ($interval !~ /[A-Za-z]/) {
+    if ( $interval !~ /[A-Za-z]/ ) {
         $interval .= 's';
-	$self->interval( $interval );
+        $self->interval($interval);
     }
 
     my $in_seconds = 0;
 
     # These should be integers, but we might need to have 0.5m
-    while ($interval =~ s/([+-]?\d*\.?\d+)([$known_units])//) {
+    while ( $interval =~ s/([+-]?\d*\.?\d+)([$known_units])// ) {
         my $amount = $1;
         my $units  = $2;
 
-        if (exists $seen{$units}) {
-            Carp::croak(
-                "Bad format supplied [" . $self->interval ."]: duplicate key."
-            );
+        if ( exists $seen{$units} ) {
+            Carp::croak( "Bad format supplied ["
+                  . $self->interval
+                  . "]: duplicate key." );
         }
 
         $seen{$units} = undef;
         $in_seconds += $amount * $PERIOD_SIZES{$units};
     }
 
-    if ($interval ne '') {
-        # We had something which didn't match the above, which renders this unparseable
+    if ( $interval ne '' ) {
+
+ # We had something which didn't match the above, which renders this unparseable
         Carp::croak(
-            "Bad format supplied [". $self->interval ."]: unknown key."
-        );
+            "Bad format supplied [" . $self->interval . "]: unknown key." );
     }
     return int $in_seconds;
 }
 
 has 'duration' => (
-    is => 'lazy',
+    is      => 'lazy',
     default => sub {
-        my ( $self ) = @_;
+        my ($self) = @_;
         my $time_ = Time::Seconds->new( $self->seconds );
         return {
             'pretty'  => $time_->pretty,
@@ -158,7 +163,7 @@ The number of minutes represented by this time interval.
 =cut
 
 sub minutes {
-    my ( $self ) = @_;
+    my ($self) = @_;
     return $self->duration->{'minutes'};
 }
 
@@ -169,7 +174,7 @@ The number of hours represented by this time interval.
 =cut
 
 sub hours {
-    my ( $self ) = @_;
+    my ($self) = @_;
     return $self->duration->{'hours'};
 }
 
@@ -180,7 +185,7 @@ The number of days represented by this time interval.
 =cut
 
 sub days {
-    my ( $self ) = @_;
+    my ($self) = @_;
     return $self->duration->{'days'};
 }
 
@@ -191,7 +196,7 @@ The number of week represented by this time interval.
 =cut
 
 sub weeks {
-    my ( $self ) = @_;
+    my ($self) = @_;
     return $self->duration->{'weeks'};
 }
 
@@ -202,13 +207,13 @@ The number of months represented by this time interval.
 =cut
 
 sub months {
-    my ( $self ) = @_;
+    my ($self) = @_;
     return $self->duration->{'months'};
 }
 
 sub _known_units {
-    my ( $self ) = @_;
-    return join('', keys %PERIOD_SIZES);
+    my ($self) = @_;
+    return join( '', keys %PERIOD_SIZES );
 }
 
 =head2 as_string
@@ -219,8 +224,8 @@ Concise time druation to string representation.
 
 sub as_string {
     my ( $self, $precision ) = @_;
-    my $time_frames = $self->_duration_array( $precision );
-    return join(' ', @$time_frames );
+    my $time_frames = $self->_duration_array($precision);
+    return join( ' ', @$time_frames );
 }
 
 =head2 as_concise_string
@@ -231,13 +236,13 @@ Concise time druation to conscise string representation.
 
 sub as_concise_string {
     my ( $self, $precision ) = @_;
-    my $time_frames = $self->_duration_array( $precision );
+    my $time_frames         = $self->_duration_array($precision);
     my @concise_time_frames = map {
-        $_ =~s/\s+//ig;
-        $_ =~/(\d+[A-Za-z]{1})/ig;
+        $_ =~ s/\s+//ig;
+        $_ =~ /(\d+[A-Za-z]{1})/ig;
         $1;
     } @$time_frames;
-    return join('', @concise_time_frames );
+    return join( '', @concise_time_frames );
 }
 
 =head2 normalized_code
@@ -247,14 +252,15 @@ The largest division of Duration
 =cut
 
 sub normalized_code {
-    my ( $self ) = @_;
+    my ($self) = @_;
     my @keys = sort { $b <=> $a } keys %LENGTH_TO_PERIOD;
 
     my $entry_code = '0s';
-    while ($entry_code eq '0s' and my $period_length = shift @keys) {
+    while ( $entry_code eq '0s' and my $period_length = shift @keys ) {
         if ( not $self->seconds % $period_length ) {
             my $period_size = $self->seconds / $period_length;
-            $entry_code = $period_size . substr($LENGTH_TO_PERIOD{$period_length}, 0, 1);
+            $entry_code =
+              $period_size . substr( $LENGTH_TO_PERIOD{$period_length}, 0, 1 );
         }
     }
     return $entry_code;
@@ -270,14 +276,17 @@ Concise time druation to array
 
 sub duration_array {
     my ( $self, $precision ) = @_;
-    my $durations = $self->_duration_array( $precision );
+    my $durations = $self->_duration_array($precision);
     my @duration_distribution;
-    foreach my $d ( @$durations ) {
-        my @d_value_unit = split(' ', $d);
-        push( @duration_distribution, {
-            'value' => $d_value_unit[0],
-            'unit'  => $d_value_unit[1]
-        } );
+    foreach my $d (@$durations) {
+        my @d_value_unit = split( ' ', $d );
+        push(
+            @duration_distribution,
+            {
+                'value' => $d_value_unit[0],
+                'unit'  => $d_value_unit[1]
+            }
+        );
     }
     return \@duration_distribution;
 }
@@ -291,25 +300,25 @@ sub _duration_array {
     my $time_frame;
     my $precision_counter = 1;
 
-    foreach my $frame ( split(',', $pretty_format) ) {
+    foreach my $frame ( split( ',', $pretty_format ) ) {
         next if $precision_counter > $precision;
         chomp $frame;
         $frame =~ s/^\s+|\s+$//g;
-        $frame =~s/s$//ig;
-        $frame =~/^(\d+)/ig;
+        $frame =~ s/s$//ig;
+        $frame =~ /^(\d+)/ig;
 
         # Make sure we gets the number
         # to avoid Use of uninitialized warning
         if ( defined $1 && $1 ) {
-            $frame  = ''  if int($1) == 0;
+            $frame = '' if int($1) == 0;
             $frame .= 's' if int($1) > 1;
+            $precision_counter++;
         }
         else {
             $frame = undef;
         }
 
-        push ( @$time_frame, $frame ) if $frame;
-        $precision_counter++;
+        push( @$time_frame, $frame ) if $frame;
     }
     return $time_frame;
 }
@@ -323,9 +332,9 @@ Returns the minimum number of the given period.
 sub minimum_number_of {
     my ( $self, $unit ) = @_;
     my $orig_unit = $unit;
-    $unit =~ s/s$// if (length($unit) > 1);    # Chop plurals, but not 's' itself
-    $unit = substr($unit,0,1);
-    $unit = 'ms' if $orig_unit =~/months/ig;
+    $unit =~ s/s$// if ( length($unit) > 1 ); # Chop plurals, but not 's' itself
+    $unit = substr( $unit, 0, 1 );
+    $unit = 'mo' if $orig_unit =~ /months/ig;
 
     my %unit_maps = (
         'mo' => 'months',
@@ -338,7 +347,7 @@ sub minimum_number_of {
     my $method = $unit_maps{$unit};
     confess "Cannot determine period for $orig_unit" unless ($method);
 
-    return ceil($self->$method);
+    return ceil( $self->$method );
 }
 
 =head1 AUTHOR
@@ -427,4 +436,4 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =cut
 
-1; # End of Time::Duration::Concise
+1;    # End of Time::Duration::Concise

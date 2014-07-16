@@ -9,7 +9,7 @@ extends 'Time::Duration::Concise';
 
 use Module::Runtime qw(require_module);
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 =head1 NAME
 
@@ -21,7 +21,7 @@ Time::Duration::Concise is an approach to localize concise time duration string 
 
 =head1 VERSION
 
-Version 0.07
+Version 0.08
 
 =head1 SYNOPSIS
 
@@ -63,7 +63,7 @@ your custom localization class name
 =cut
 
 has 'localize_class' => (
-    is => 'rw',
+    is       => 'rw',
     required => 1
 );
 
@@ -76,7 +76,7 @@ default paramenters to your class methods would be $val, $unit
 =cut
 
 has 'localize_method' => (
-    is => 'rw',
+    is       => 'rw',
     required => 1
 );
 
@@ -94,18 +94,14 @@ sub as_string {
     my $localize_class  = $self->localize_class;
     my $localize_method = $self->localize_method;
 
-    require_module( $localize_class );
+    require_module($localize_class);
 
     my @duration_translated;
-    foreach my $duration ( @{$self->duration_array( $precision )} ){
-        push(
-            @duration_translated,
-            &$localize_method(
-                $duration->{'value'}, $duration->{'unit'}
-            )
-        );
+    foreach my $duration ( @{ $self->duration_array($precision) } ) {
+        push( @duration_translated,
+            &$localize_method( $duration->{'value'}, $duration->{'unit'} ) );
     }
-    return join(' ', @duration_translated);
+    return join( ' ', @duration_translated );
 }
 
 =head1 AUTHOR
@@ -194,4 +190,4 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =cut
 
-1; # End of Time::Duration::Concise::Localize
+1;    # End of Time::Duration::Concise::Localize
