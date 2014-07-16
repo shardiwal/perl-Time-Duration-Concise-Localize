@@ -19,11 +19,11 @@ Time::Duration::Concise is an improved approach to convert concise time duration
 
 =head1 VERSION
 
-Version 0.06
+Version 0.07
 
 =cut
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 our %LENGTH_TO_PERIOD = (
     86400 => 'day',
@@ -297,6 +297,9 @@ sub _duration_array {
     $precision ||= 10;
 
     my $pretty_format = $self->duration->{'pretty'};
+
+    $pretty_format=~s/minus /-/ig;
+
     my $time_frame;
     my $precision_counter = 1;
 
