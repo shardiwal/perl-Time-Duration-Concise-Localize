@@ -19,11 +19,11 @@ Time::Duration::Concise is an improved approach to convert concise time duration
 
 =head1 VERSION
 
-Version 0.07
+Version 0.08
 
 =cut
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 our %LENGTH_TO_PERIOD = (
     86400 => 'day',
@@ -239,7 +239,7 @@ sub as_concise_string {
     my $time_frames         = $self->_duration_array($precision);
     my @concise_time_frames = map {
         $_ =~ s/\s+//ig;
-        $_ =~ /(\d+[A-Za-z]{1})/ig;
+        $_ =~ /([-|\+]?\d+[A-Za-z]{1})/ig;
         $1;
     } @$time_frames;
     return join( '', @concise_time_frames );
@@ -300,30 +300,35 @@ sub _duration_array {
 
     $pretty_format=~s/minus /-/ig;
 
-    my $time_frame;
+    my @time_frame;
     my $precision_counter = 1;
-
     foreach my $frame ( split( ',', $pretty_format ) ) {
         next if $precision_counter > $precision;
         chomp $frame;
         $frame =~ s/^\s+|\s+$//g;
         $frame =~ s/s$//ig;
-        $frame =~ /^(\d+)/ig;
+        $frame =~ /^([-|\+]?\d+\s)/ig;
 
         # Make sure we gets the number
         # to avoid Use of uninitialized warning
-        if ( defined $1 && $1 ) {
-            $frame = '' if int($1) == 0;
-            $frame .= 's' if int($1) > 1;
-            $precision_counter++;
-        }
-        else {
-            $frame = undef;
-        }
+        my $value = $1;
+        if ( defined $value && $value ) {
 
-        push( @$time_frame, $frame ) if $frame;
+            $value =~s/\s+//ig;
+
+            $frame = ''   if $value == 0;
+            $frame .= 's' if $value > 1;
+
+            if ( $frame ) {
+                push( @time_frame, $frame );
+                $precision_counter++;
+            }
+        }
     }
-    return $time_frame;
+    if ( !scalar @time_frame ) {
+        push ( @time_frame, '0 second' );
+    }
+    return \@time_frame;
 }
 
 =head2 minimum_number_of
