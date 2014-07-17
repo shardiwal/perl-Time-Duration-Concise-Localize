@@ -28,3 +28,6 @@ Revision history for Time-Duration-Concise-Localize
 
 0.09    16/07/2014
         when printing duration as string minues should be symbol not text
+
+1.0     17/07/2014
+        More test cases and improvements
