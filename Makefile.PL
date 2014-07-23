@@ -21,10 +21,10 @@ WriteMakefile(
         'Test::Exception'    => 0,
     },
     PREREQ_PM => {
-        'Moo'                => 0,
+        'Tie::Hash::LRU'     => 0,
         'Carp'               => 0,
         'Module::Runtime'    => 0,
-        'POSIX' 	     => 0,
+        'POSIX' 	         => 0,
         'Time::Seconds'      => 1.27,
     },
     (! eval { ExtUtils::MakeMaker->VERSION(6.46) } ? () :
