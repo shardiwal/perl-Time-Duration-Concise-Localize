@@ -4,12 +4,11 @@ use 5.006;
 use strict;
 use warnings FATAL => 'all';
 
-use Moo;
-extends 'Time::Duration::Concise';
-
+use Carp;
+use base qw(Time::Duration::Concise);
 use Module::Runtime qw(require_module);
 
-our $VERSION = '1.0';
+our $VERSION = '1.1';
 
 =head1 NAME
 
@@ -21,7 +20,7 @@ Time::Duration::Concise is an approach to localize concise time duration string 
 
 =head1 VERSION
 
-Version 1.0
+Version 1.1
 
 =head1 SYNOPSIS
 
@@ -62,10 +61,10 @@ your custom localization class name
 
 =cut
 
-has 'localize_class' => (
-    is       => 'rw',
-    required => 1
-);
+sub localize_class {
+    my $self = shift;
+    return $self->{'_localize_class'};
+}
 
 =head2 localize_method (REQUIRED)
 
@@ -75,10 +74,10 @@ default paramenters to your class methods would be $val, $unit
 
 =cut
 
-has 'localize_method' => (
-    is       => 'rw',
-    required => 1
-);
+sub localize_method {
+    my $self = shift;
+    return $self->{'_localize_method'};
+}
 
 =head1 METHODS
 
@@ -94,14 +93,43 @@ sub as_string {
     my $localize_class  = $self->localize_class;
     my $localize_method = $self->localize_method;
 
-    require_module($localize_class);
+    eval { require_module($localize_class); };
+    die 'Failed to import localize class: ' if $@;
 
     my @duration_translated;
     foreach my $duration ( @{ $self->duration_array($precision) } ) {
-        push( @duration_translated,
-            &$localize_method( $duration->{'value'}, $duration->{'unit'} ) );
+        my $translated_interval = '';
+        eval {
+            $translated_interval =
+              &$localize_method( $duration->{'value'}, $duration->{'unit'} );
+        };
+        confess 'Failed to call localize method: ' . $_ if $@;
+        push( @duration_translated, $translated_interval );
     }
     return join( ' ', @duration_translated );
+}
+
+=head2 new
+
+Object constructor
+
+=cut
+
+sub new {
+    my $class = shift;
+    my %params_ref = ref( $_[0] ) ? %{ $_[0] } : @_;
+
+    my $interval = $params_ref{'interval'};
+
+    confess "Missing required arguments"
+      unless $params_ref{'localize_class'} and $params_ref{'localize_method'};
+
+    my $self = $class->SUPER::new( interval => $interval );
+    $self->{'_localize_class'}  = $params_ref{'localize_class'};
+    $self->{'_localize_method'} = $params_ref{'localize_method'};
+
+    my $obj = bless $self, $class;
+    return $obj;
 }
 
 =head1 AUTHOR

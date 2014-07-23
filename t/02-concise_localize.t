@@ -34,7 +34,7 @@ is ( scalar @{$duration->duration_array(1)}, '1', 'Duration array precision 1');
 is ( $duration->minimum_number_of('seconds'), 91800, 'Minimum number of seconds');
 is ( $duration->minimum_number_of('s'), 91800, 'Minimum number of unt s');
 
-is ( $duration->duration->{'pretty'}, '1 days, 1 hours, 30 minutes, 0 seconds', 'Time::Seconds prettfies good');
+is ( $duration->duration->{'time'}->pretty, '1 days, 1 hours, 30 minutes, 0 seconds', 'Time::Seconds prettfies good');
 is ( $duration->normalized_code, '1530m', 'normalized code is good');
 
 subtest "concise format input require" => sub {

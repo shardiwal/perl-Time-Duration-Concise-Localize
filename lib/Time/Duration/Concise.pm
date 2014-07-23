@@ -5,9 +5,12 @@ use strict;
 use warnings FATAL => 'all';
 
 use Time::Seconds;
-use POSIX qw(floor ceil);
-use Moo;
+use POSIX qw(ceil);
 use Carp;
+use Tie::Hash::LRU;
+
+our %popular;
+our $lru = tie %popular, 'Tie::Hash::LRU', 100;
 
 =head1 NAME
 
@@ -19,11 +22,11 @@ Time::Duration::Concise is an improved approach to convert concise time duration
 
 =head1 VERSION
 
-Version 0.08
+Version 0.09
 
 =cut
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 our %LENGTH_TO_PERIOD = (
     86400 => 'day',
@@ -32,8 +35,16 @@ our %LENGTH_TO_PERIOD = (
     1     => 'second',
 );
 
-our %PERIOD_SIZES =
-  map { substr( $LENGTH_TO_PERIOD{$_}, 0, 1 ) => $_ } keys %LENGTH_TO_PERIOD;
+our %PERIOD_SIZES = (
+    'd' => 86400,
+    'h' => 3600,
+    'm' => 60,
+    's' => 1,
+);
+
+our @KNOWN_UNITS = qw[d h m s];
+
+our $KNOWN_UNITS_ = 'dhms';
 
 =head1 SYNOPSIS
 
@@ -73,88 +84,50 @@ Example : 1.5h
 
 =cut
 
-has 'interval' => (
-    is       => 'rw',
-    required => 1
-);
+=head1 METHODS
 
-has 'seconds' => (
-    is      => 'lazy',
-    builder => '_build_in_seconds'
-);
+=head2 interval
 
-sub _build_in_seconds {
+Returns the given time interval.
+
+=cut
+
+sub interval {
+    my ($self) = @_;
+    return $self->{'_interval'};
+}
+
+=head2 seconds
+
+The number of seconds represented by this time interval.
+
+=cut
+
+sub seconds {
     my ($self) = @_;
 
-    my $interval = $self->interval;
+    return $self->{'_seconds'} if $self->{'_seconds'};
 
-    if ( defined $interval ) {
-        Carp::croak( "Invalid time interval" ) if $interval eq '';
-    }
+    my $interval    = $self->{'_interval'};
+    my $known_units = $KNOWN_UNITS_;
 
-    my $known_units = $self->_known_units;
-
-    my %seen;
-
-    # Try our best to make it parseable.
-    $interval =~ s/\s//g;
-    $interval = lc $interval;
-
-    # All numbers implies a number of seconds.
-    if ( $interval !~ /[A-Za-z]/ ) {
-        $interval .= 's';
-        $self->interval($interval);
-    }
-
-    my $in_seconds = 0;
+    my $seconds = 0;
 
     # These should be integers, but we might need to have 0.5m
     while ( $interval =~ s/([+-]?\d*\.?\d+)([$known_units])// ) {
         my $amount = $1;
         my $units  = $2;
-
-        if ( exists $seen{$units} ) {
-            Carp::croak( "Bad format supplied ["
-                  . $self->interval
-                  . "]: duplicate key." );
-        }
-
-        $seen{$units} = undef;
-        $in_seconds += $amount * $PERIOD_SIZES{$units};
+        $seconds += $amount * $PERIOD_SIZES{$units};
     }
 
     if ( $interval ne '' ) {
 
  # We had something which didn't match the above, which renders this unparseable
-        Carp::croak(
-            "Bad format supplied [" . $self->interval . "]: unknown key." );
+        Carp::croak( "Bad format supplied [" . $interval . "]: unknown key." );
     }
-    return int $in_seconds;
+    $self->{'_seconds'} = int $seconds;
+    return $self->{'_seconds'};
 }
-
-has 'duration' => (
-    is      => 'lazy',
-    default => sub {
-        my ($self) = @_;
-        my $time_ = Time::Seconds->new( $self->seconds );
-        return {
-            'pretty'  => $time_->pretty,
-            'years'   => $time_->years,
-            'months'  => $time_->months,
-            'weeks'   => $time_->weeks,
-            'days'    => $time_->days,
-            'hours'   => $time_->hours,
-            'minutes' => $time_->minutes,
-            'seconds' => $time_->seconds
-        };
-    }
-);
-
-=head1 METHODS
-
-=head2 seconds
-
-The number of seconds represented by this time interval.
 
 =head2 minutes
 
@@ -211,11 +184,6 @@ sub months {
     return $self->duration->{'months'};
 }
 
-sub _known_units {
-    my ($self) = @_;
-    return join( '', keys %PERIOD_SIZES );
-}
-
 =head2 as_string
 
 Concise time druation to string representation.
@@ -253,14 +221,14 @@ The largest division of Duration
 
 sub normalized_code {
     my ($self) = @_;
-    my @keys = sort { $b <=> $a } keys %LENGTH_TO_PERIOD;
+    my @keys = sort @KNOWN_UNITS;
 
     my $entry_code = '0s';
-    while ( $entry_code eq '0s' and my $period_length = shift @keys ) {
+    while ( $entry_code eq '0s' and my $period = shift @keys ) {
+        my $period_length = $PERIOD_SIZES{$period};
         if ( not $self->seconds % $period_length ) {
             my $period_size = $self->seconds / $period_length;
-            $entry_code =
-              $period_size . substr( $LENGTH_TO_PERIOD{$period_length}, 0, 1 );
+            $entry_code = $period_size . $period;
         }
     }
     return $entry_code;
@@ -296,9 +264,11 @@ sub _duration_array {
 
     $precision ||= 10;
 
-    my $pretty_format = $self->duration->{'pretty'};
+    return $self->{"_duration_array_$precision"}
+      if $self->{"_duration_array_$precision"};
 
-    $pretty_format=~s/minus /-/ig;
+    my $pretty_format = $self->duration->{'time'}->pretty;
+    $pretty_format =~ s/minus /-/ig;
 
     my @time_frame;
     my $precision_counter = 1;
@@ -314,20 +284,21 @@ sub _duration_array {
         my $value = $1;
         if ( defined $value && $value ) {
 
-            $value =~s/\s+//ig;
+            $value =~ s/\s+//ig;
 
-            $frame = ''   if $value == 0;
+            $frame = '' if $value == 0;
             $frame .= 's' if $value > 1;
 
-            if ( $frame ) {
+            if ($frame) {
                 push( @time_frame, $frame );
                 $precision_counter++;
             }
         }
     }
     if ( !scalar @time_frame ) {
-        push ( @time_frame, '0 second' );
+        push( @time_frame, '0 second' );
     }
+    $self->{"_duration_array_$precision"} = \@time_frame;
     return \@time_frame;
 }
 
@@ -356,6 +327,78 @@ sub minimum_number_of {
     confess "Cannot determine period for $orig_unit" unless ($method);
 
     return ceil( $self->$method );
+}
+
+=head2 duration
+
+Returns HASH of duration with the following keys
+
+	    'time'    # Time::Seconds object
+	    'years'   
+	    'months'  
+	    'weeks'   
+	    'days'    
+	    'hours'   
+	    'minutes' 
+	    'seconds' 
+
+=cut
+
+sub duration {
+    my ($self) = @_;
+    return $self->{'_duration'} if $self->{'_duration'};
+    my $time_    = Time::Seconds->new( $self->seconds );
+    my $duration = {
+        'time'    => $time_,
+        'years'   => $time_->years,
+        'months'  => $time_->months,
+        'weeks'   => $time_->weeks,
+        'days'    => $time_->days,
+        'hours'   => $time_->hours,
+        'minutes' => $time_->minutes,
+        'seconds' => $time_->seconds
+    };
+    $self->{'_duration'} = $duration;
+}
+
+=head2 new
+
+Object constructor
+
+=cut
+
+sub new {
+    my $class = shift;
+    my %params_ref = ref( $_[0] ) ? %{ $_[0] } : @_;
+
+    my $interval = $params_ref{'interval'};
+
+    confess "Missing required arguments"
+      unless $interval;
+
+    if ( $popular{$interval} ) {
+        ## Helps in multiple calling, it would really save the time
+        return $popular{$interval};
+    }
+
+    if ( defined $interval ) {
+        Carp::croak("Invalid time interval") if $interval eq '';
+    }
+    my $known_units = $KNOWN_UNITS_;
+
+    # Try our best to make it parseable.
+    $interval =~ s/\s//g;
+    $interval = lc $interval;
+
+    # All numbers implies a number of seconds.
+    if ( $interval !~ /[A-Za-z]/ ) {
+        $interval .= 's';
+    }
+
+    my $self = { _interval => $interval, };
+    my $obj = bless $self, $class;
+    $popular{$interval} = $obj;
+    return $obj;
 }
 
 =head1 AUTHOR
