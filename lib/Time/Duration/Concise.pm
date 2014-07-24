@@ -374,7 +374,7 @@ sub new {
     my $interval = $params_ref{'interval'};
 
     confess "Missing required arguments"
-      unless $interval;
+      unless defined $interval;
 
     if ( $popular{$interval} ) {
         ## Helps in multiple calling, it would really save the time
