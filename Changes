@@ -34,3 +34,6 @@ Revision history for Time-Duration-Concise-Localize
 
 1.1     24/07/2014
         Remove Moo uses and go with traditional OO approach along with Tie::Hash::LRU for cache
+
+1.3     26/07/2014
+        Strange bug in object caching
