@@ -22,11 +22,11 @@ Time::Duration::Concise is an improved approach to convert concise time duration
 
 =head1 VERSION
 
-Version 1.0
+Version 1.1
 
 =cut
 
-our $VERSION = '1.0';
+our $VERSION = '1.1';
 
 our %LENGTH_TO_PERIOD = (
     86400 => 'day',
@@ -361,6 +361,7 @@ sub duration {
         'seconds' => $time_->seconds
     };
     $self->{'_duration'} = $duration;
+    return $duration;
 }
 
 =head2 new
