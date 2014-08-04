@@ -8,16 +8,22 @@ use Test::FailWarnings;
 use Test::Exception;
 use Time::Duration::Concise;
 
-plan tests => 16;
+plan tests => 22;
 
 my $duration = Time::Duration::Concise->new(
     interval => '1d1.5h'
 );
 
+is ( $duration->interval, '1d1.5h', 'Interval');
 is ( $duration->seconds, 91800, 'Seconds');
-is ( $duration->days, 1.0625, 'Days');
-is ( $duration->hours, 25.5, 'Hours');
+is ( sprintf("%.3f",$duration->days), 1.062, 'Days');
+is ( sprintf("%.1f",$duration->hours), 25.5, 'Hours');
 is ( $duration->minutes, 1530, 'Minutes');
+is ( sprintf("%.2f",$duration->weeks), 0.15, 'Week');
+is ( sprintf("%.2f",$duration->months), 0.03, 'Months');
+is ( $duration->as_concise_string, '1d1h30m', 'Concise string');
+is ( $duration->normalized_code, '1530m', 'Normalized Code');
+is ( ref $duration->duration, 'HASH', 'Duration');
 is ( $duration->as_string, '1 day 1 hour 30 minutes', 'As string');
 is ( $duration->as_string(1), '1 day', 'As string precision 1');
 is ( $duration->as_string(2), '1 day 1 hour', 'As string precision 2');

@@ -21,8 +21,8 @@ my $duration = Time::Duration::Concise::Localize->new(
 );
 
 is ( ref $duration->localize_method, 'CODE', 'Localize anonymous method');
-is ( $duration->days, 1.0625, 'Days');
-is ( $duration->hours, 25.5, 'Hours');
+is ( sprintf("%.3f",$duration->days), 1.062, 'Days');
+is ( sprintf("%.1f",$duration->hours), 25.5, 'Hours');
 is ( $duration->minutes, 1530, 'Minutes');
 is ( $duration->as_string, '1 hari 1 jam 30 minit', 'As string');
 is ( $duration->as_string(1), '1 hari', 'As string precision 1');

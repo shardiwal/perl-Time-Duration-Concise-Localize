@@ -11,33 +11,33 @@ my %results = (
         normalized_code => '1d',
         as_concise_string       => '1d',
         seconds => 86400,
-        minutes => 1440,
-        hours   => 24,
-        days    => 1,
+        minutes => '1440.00',
+        hours   => '24.00',
+        days    => '1.0000',
     },
     pi_hour => {
         normalized_code => '11304s',
         as_concise_string       => '3h8m24s',
         seconds => 11304,
-        minutes => 188.4,
-        hours   => 3.14,
-        days    => 0.130833333333333,
+        minutes => '188.40',
+        hours   => '3.14',
+        days    => '0.1308',
     },
     e_minute => {
         normalized_code => '162s',
         as_concise_string       => '2m42s',
         seconds => 162,
-        minutes => 2.7,
-        hours   => 0.045,
-        days    => 0.001875,
+        minutes => '2.70',
+        hours   => '0.05',
+        days    => '0.0019',
     },
     kibi_second => {
         normalized_code => '1024s',
         as_concise_string       => '17m4s',
         seconds => 1024,
-        minutes => 17.0666666666667,
-        hours   => 0.284444444444444,
-        days    => 0.0118518518518519,
+        minutes => '17.07',
+        hours   => '0.28',
+        days    => '0.0119',
     },
 );
 
@@ -61,7 +61,7 @@ sub comparisons {
     is($ti_obj->normalized_code, $results{$which}->{'normalized_code'}, ' normalized_code match.');
     is($ti_obj->as_concise_string,       $results{$which}->{'as_concise_string'},       ' as_concise_string match');
     is($ti_obj->seconds, $results{$which}->{'seconds'}, ' seconds match.');
-    is($ti_obj->minutes, $results{$which}->{'minutes'}, ' minutes match.');
-    is($ti_obj->hours,   $results{$which}->{'hours'},   ' hours match.');
-    is($ti_obj->days,    $results{$which}->{'days'},    ' days match.');
+    is(sprintf("%.2f",$ti_obj->minutes), $results{$which}->{'minutes'}, ' minutes match.');
+    is(sprintf("%.2f",$ti_obj->hours),   $results{$which}->{'hours'},   ' hours match.');
+    is(sprintf("%.4f",$ti_obj->days),    $results{$which}->{'days'},    ' days match.');
 }
